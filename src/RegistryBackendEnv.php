@@ -71,8 +71,9 @@ implements RegistryBackendInterface
         $ret = [];
         $env_var_pattern = self::convert_class_name($class_name);
         foreach ($this->env_vars as $env_var_name=>$env_var_value) {
-            if (stripos($env_var, $env_var_pattern) !== FALSE) {
-                $ret[] = $env_var_value;
+            if (stripos($env_var_name, $env_var_pattern) !== FALSE) {
+                $var_name = self::convert_env_var_name($env_var_name, $class_name);
+                $ret[$var_name] = $env_var_value;
             }
         }
         return $ret;
@@ -87,6 +88,15 @@ implements RegistryBackendInterface
     protected static function convert_key(string $key) : string
     {
         $ret = strtoupper($key);
+        return $ret;
+    }
+
+    protected static function convert_env_var_name(string $env_var_name, string $class_name) : string
+    {
+        $converted_class_name = self::convert_class_name($class_name);
+        $ret = str_replace($converted_class_name.'_', '', $env_var_name);
+        $ret = strtolower($ret);
+
         return $ret;
     }
 
