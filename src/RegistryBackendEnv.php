@@ -13,6 +13,9 @@ use Azonmedia\Registry\Interfaces\RegistryBackendInterface;
  * The env variables are loaded in __construct()
  * This means that no lookup for env vars will be done after that - if a change in the envvars is done during runtime this will not be reflected
  *
+ * @example A config key 'some_key' of class Some\Name\Space\Cls will be looked into env vars wit hthe following name:
+ * {$env_var_prefix}SOME_NAME_SPACE_CLS_SOME_KEY
+ *
  * @package Azonmedia\Registry
  */
 class RegistryBackendEnv
@@ -42,6 +45,13 @@ implements RegistryBackendInterface
         $this->env_vars = array_map('strtoupper', getenv() );
     }
 
+    /**
+     * {@inheritDoc}
+     * @param string $class_name
+     * @param string $key
+     * @param null $default_value
+     * @return mixed|null
+     */
     public function get_config_value(string $class_name, string $key, /* mixed */ $default_value = NULL) /* mixed */
     {
         $ret = $default_value;
@@ -52,6 +62,11 @@ implements RegistryBackendInterface
         return $ret;
     }
 
+    /**
+     * {@inheritDoc}
+     * @param string $class_name
+     * @return bool
+     */
     public function class_is_in_registry(string $class_name) : bool
     {
         $ret = FALSE;
@@ -66,6 +81,11 @@ implements RegistryBackendInterface
         return $ret;
     }
 
+    /**
+     * {@inheritDoc}
+     * @param string $class_name
+     * @return array
+     */
     public function get_class_config_values(string $class_name) : array
     {
         $ret = [];
@@ -79,18 +99,34 @@ implements RegistryBackendInterface
         return $ret;
     }
 
+    /**
+     * Converts from provided $class_name to a environment variable naming convention (CAPS_WITH_UNDERSCORES)
+     * @param string $class_name
+     * @return string
+     */
     protected static function convert_class_name(string $class_name) : string
     {
         $ret = strtoupper(str_replace('\\','_',$class_name));
         return $ret;
     }
 
+    /**
+     * Converts the provided configuration entry $Key to environment variable naming convention
+     * @param string $key
+     * @return string
+     */
     protected static function convert_key(string $key) : string
     {
         $ret = strtoupper($key);
         return $ret;
     }
 
+    /**
+     * Converts an ENV_VAR to a
+     * @param string $env_var_name
+     * @param string $class_name
+     * @return string
+     */
     protected static function convert_env_var_name(string $env_var_name, string $class_name) : string
     {
         $converted_class_name = self::convert_class_name($class_name);
