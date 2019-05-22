@@ -16,6 +16,8 @@ use Azonmedia\Registry\Interfaces\RegistryBackendInterface;
  * @example A config key 'some_key' of class Some\Name\Space\Cls will be looked into env vars wit hthe following name:
  * {$env_var_prefix}SOME_NAME_SPACE_CLS_SOME_KEY
  *
+ * TODO - handle arrays in configs
+ *
  * @package Azonmedia\Registry
  */
 class RegistryBackendEnv
@@ -96,6 +98,7 @@ implements RegistryBackendInterface
                 $ret[$var_name] = $env_var_value;
             }
         }
+
         return $ret;
     }
 
