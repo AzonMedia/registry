@@ -44,7 +44,10 @@ implements RegistryBackendInterface
     public function __construct(string $env_var_prefix)
     {
         $this->env_var_prefix = $env_var_prefix;
-        $this->env_vars = array_map('strtoupper', getenv() );
+        $env_vars = getenv();
+        //array_walk($env_vars, function(&$value, &$key) : void { $key = strtoupper($key); } );
+        $env_vars = array_change_key_case($env_vars, CASE_UPPER);
+        $this->env_vars = $env_vars;
     }
 
     /**
