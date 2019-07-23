@@ -102,7 +102,7 @@ class RegistryBackendArray implements RegistryBackendInterface
 
         foreach (new DirectoryIterator($config_path) as $file) {
             if ($file->isFile()) {
-                if (substr($file->getFilename(), -10) === '.local.php') {
+                if (substr($file->getFilename(), -10) === '.local.php' || $file->getFilename() == 'local.php') {
                     $current_config = include $file->getRealPath();
                     $this->local_config = array_merge_recursive($this->local_config, $current_config);
                 } elseif ($file->getExtension() === 'php') {
