@@ -101,6 +101,10 @@ class RegistryBackendArray implements RegistryBackendInterface
         }
 
         foreach (new DirectoryIterator($config_path) as $file) {
+            if ($file->isDot()) {
+                continue;
+            }
+
             if ($file->isFile()) {
                 if (substr($file->getFilename(), -10) === '.local.php' || $file->getFilename() == 'local.php') {
                     $current_config = include $file->getRealPath();
