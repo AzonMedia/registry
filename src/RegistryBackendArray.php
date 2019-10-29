@@ -111,7 +111,7 @@ class RegistryBackendArray implements RegistryBackendInterface
                     $this->local_config = array_merge_recursive($this->local_config, $current_config);
                 } elseif ($file->getExtension() === 'php') {
                     $current_config = include $file->getRealPath();
-                    $this->local_config = array_merge_recursive($this->global_config, $current_config);
+                    $this->global_config = array_merge_recursive($this->global_config, $current_config);
                 }
             } elseif ($file->isDir()) {
                 $this->generate_config($file->getRealPath());
