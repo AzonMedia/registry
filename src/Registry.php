@@ -2,9 +2,9 @@
 
 namespace Azonmedia\Registry;
 
-
 use Azonmedia\Registry\Interfaces\RegistryBackendInterface;
 use Azonmedia\Registry\Interfaces\RegistryInterface;
+use Symfony\Component\VarExporter\VarExporter;
 
 /**
  * Class Registry
@@ -25,6 +25,16 @@ implements RegistryInterface
     protected $registry_backends = [];
 
     /**
+     * @var string
+     */
+    protected string $generated_runtime_config_file = '';
+
+    /**
+     * @var string
+     */
+    protected string $generated_runtime_config_dir = '';
+
+    /**
      * Registry constructor.
      * Registry needs at least one backend to operate so it needs to be provided in the constructor.
      * This is the primary backend.
@@ -32,9 +42,35 @@ implements RegistryInterface
      * Once a backend is added it can not be removed.
      * @param RegistryBackendInterface $registryBackend
      */
-    public function __construct(RegistryBackendInterface $RegistryBackend)
+    public function __construct(RegistryBackendInterface $RegistryBackend, string $generated_runtime_config_file = '', string $generated_runtime_config_dir = '')
     {
         $this->add_backend($RegistryBackend);
+        $this->generated_runtime_config_file = $generated_runtime_config_file;
+        $this->generated_runtime_config_dir = $generated_runtime_config_dir;
+
+        $this->remove_dir($generated_runtime_config_dir);
+
+        if (file_exists($generated_runtime_config_file)) {
+            unlink($generated_runtime_config_file);
+        }
+    }
+
+    private function remove_dir($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (is_dir($dir."/".$object) && !is_link($dir."/".$object)) {
+                        $this->remove_dir($dir."/".$object);
+                    } else {
+                        unlink($dir."/".$object);
+                    }
+                }
+            }
+
+            rmdir($dir);
+        }
     }
 
     /**
@@ -88,15 +124,98 @@ implements RegistryInterface
     public function get_class_config_values(string $class_name) : array
     {
         $ret = [];
+        $file_content = '';
+
         foreach ($this->registry_backends as $RegisteredRegistryBackend) {
             $in_reg = $RegisteredRegistryBackend->class_is_in_registry($class_name);
             if ($in_reg) {
-                $ret = $RegisteredRegistryBackend->get_class_config_values($class_name);
-                break;
+                $config_values = $RegisteredRegistryBackend->get_class_config_values($class_name);
+
+                $merged_values = array_replace_recursive($ret, $config_values);
+
+                if ($ret != $merged_values) {
+                    $ret = $merged_values;
+
+                    $file_content .= 'Rewriter Registered Backend: ' . get_class($RegisteredRegistryBackend) . PHP_EOL;
+                    $file_content .= 'Rewrited properties: ';
+                    $file_content .= print_r($config_values, TRUE);
+
+                    $this->add_to_runtime_files($class_name, $config_values, "changes from " . get_class($RegisteredRegistryBackend));
+                }
             }
         }
+
+        $this->add_to_runtime_config_file($class_name, $file_content);
+
         return $ret;
     }
 
-    
+    /**
+     * dump all classes CONFIG_RUNTIME data and their changes in one file
+     */
+    public function add_to_runtime_config_file($class_name, $content) : void
+    {
+        if ($this->generated_runtime_config_file != '') {
+
+            if (\Swoole\Coroutine::getCid() > 0) {
+                \Swoole\Coroutine\System::writeFile($this->generated_runtime_config_file, $content, 1);
+            } else {
+                file_put_contents($this->generated_runtime_config_file, $content, FILE_APPEND);
+            }
+        }
+    }
+
+    /**
+     * dump all classes FINAL CONFIG_RUNTIME data in a directory, structured according to their namespaces
+     */
+    public function add_to_runtime_files($class_name, $content, $comment = '') : void
+    {
+
+        if ($this->generated_runtime_config_dir != '') {
+
+            $exploded_class_name = explode("\\", $class_name);
+
+            $file_name = $this->generated_runtime_config_dir . '/' . implode("/", $exploded_class_name) . '.php';
+            unset($exploded_class_name[count($exploded_class_name) - 1]);
+
+            $dir = $this->generated_runtime_config_dir . '/' . implode("/", $exploded_class_name);
+
+            $config_runtime_str = VarExporter::export($content);
+            $file_content = '';
+
+            if (!file_exists($file_name)) {
+
+               $file_content = <<<FILE
+<?php
+declare(strict_types=1);
+FILE;
+            }
+
+            $file_content .= <<<FILE
+
+
+// $comment
+\$CONFIG_RUNTIME = $config_runtime_str;
+FILE;
+
+            if (strpos($comment, 'FINAL') !== false) {
+
+            $file_content .= <<<FILE
+
+
+return \$CONFIG_RUNTIME;
+FILE;
+            }
+
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, TRUE);
+            }
+
+            if (\Swoole\Coroutine::getCid() > 0) {
+                \Swoole\Coroutine\System::writeFile($file_name, $file_content, 1);
+            } else {
+                file_put_contents($file_name, $file_content, FILE_APPEND);
+            }
+        }
+    }
 }
