@@ -40,7 +40,7 @@ class RegistryBackendArray implements RegistryBackendInterface
     public function __construct(string $config_path)
     {
         $this->generate_config($config_path);
-        $this->config = array_merge_recursive($this->global_config, $this->local_config);
+        $this->config = array_replace_recursive($this->global_config, $this->local_config);
     }
 
     /**
@@ -108,10 +108,10 @@ class RegistryBackendArray implements RegistryBackendInterface
             if ($file->isFile()) {
                 if (substr($file->getFilename(), -10) === '.local.php' || $file->getFilename() == 'local.php') {
                     $current_config = include $file->getRealPath();
-                    $this->local_config = array_merge_recursive($this->local_config, $current_config);
+                    $this->local_config = array_replace_recursive($this->local_config, $current_config);
                 } elseif ($file->getExtension() === 'php') {
                     $current_config = include $file->getRealPath();
-                    $this->global_config = array_merge_recursive($this->global_config, $current_config);
+                    $this->global_config = array_replace_recursive($this->global_config, $current_config);
                 }
             } elseif ($file->isDir()) {
                 $this->generate_config($file->getRealPath());
