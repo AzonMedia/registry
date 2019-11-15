@@ -10,4 +10,8 @@ interface RegistryInterface
 
     public function get_class_config_values(string $class_name) : array ;
 
+    public function get_backends() : array ;
+
+    public function add_backend(RegistryBackendInterface $RegistryBackend) : bool ;
+
 }

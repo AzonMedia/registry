@@ -90,6 +90,15 @@ implements RegistryInterface
     }
 
     /**
+     * Returns an array of RegistryBackendInterface of the currently registered ones.
+     * @return array
+     */
+    public function get_backends() : array
+    {
+        return $this->registry_backends;
+    }
+
+    /**
      * Because it has $default_value argument which will be returned if no value is found this method can be used for checking is there such value
      * @param string $class_name
      * @param string $key
