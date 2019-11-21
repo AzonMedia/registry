@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<config>
+    <A_key name="GuzabaPlatform\Platform\Application\RedisConnection">
+        <host>127.0.0.1</host>
+        <port>6379</port>
+        <timeout>1.5</timeout>
+        <password></password>
+        <database>0</database>
+        <services>
+            <I_0>ConnectionFactory</I_0>
+        </services>
+        <expiry_time>3600</expiry_time>
+    </A_key>
+    <A_key name="GuzabaPlatform\Platform\Application\MysqlConnection">
+        <host>127.0.0.2</host>
+        <port>3306</port>
+        <user>user</user>
+        <password>pass</password>
+        <database>db</database>
+        <tprefix>db_</tprefix>
+    </A_key>
+</config>
