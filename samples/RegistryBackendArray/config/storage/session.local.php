@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 // this file will override the key 'session' in other global php files
 return [

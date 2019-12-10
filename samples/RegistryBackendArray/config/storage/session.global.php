@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 // this configuration will be parsed due to recursive handling of the config folder
 return [
