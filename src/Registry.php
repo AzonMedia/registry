@@ -135,6 +135,9 @@ implements RegistryInterface
         $ret = [];
         $file_content = '';
 
+        //the order of the registries is the reverse - the newly added ones override the previously added ones
+        //if the first added registry needs to have highest priority (reverse the order) then the code should be
+        //foreach (array_reverse($this->registry_backends) as $RegisteredRegistryBackend) {
         foreach ($this->registry_backends as $RegisteredRegistryBackend) {
             $in_reg = $RegisteredRegistryBackend->class_is_in_registry($class_name);
             if ($in_reg) {
