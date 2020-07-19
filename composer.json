@@ -4,7 +4,7 @@
     "description": "Library for loading and providing configuration settings",
     "keywords": ["utility","registry"],
     "homepage": "https://github.com/AzonMedia/reflection",
-    "license": "BSD-3-Clause",
+    "license": "MIT",
     "authors": [
         {
             "name": "Vesko Kenashkov",
