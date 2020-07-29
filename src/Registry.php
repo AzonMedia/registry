@@ -169,7 +169,7 @@ implements RegistryInterface
     {
         if ($this->generated_runtime_config_file != '') {
 
-            if (\Swoole\Coroutine::getCid() > 0) {
+            if (self::get_cid() > 0) {
                 \Swoole\Coroutine\System::writeFile($this->generated_runtime_config_file, $content, 1);
             } else {
                 file_put_contents($this->generated_runtime_config_file, $content, FILE_APPEND);
@@ -223,11 +223,20 @@ FILE;
                 mkdir($dir, 0755, TRUE);
             }
 
-            if (\Swoole\Coroutine::getCid() > 0) {
+            if (self::get_cid() > 0) {
                 \Swoole\Coroutine\System::writeFile($file_name, $file_content, 1);
             } else {
                 file_put_contents($file_name, $file_content, FILE_APPEND);
             }
         }
+    }
+
+    private static function get_cid(): int
+    {
+        $cid = -1;
+        if (extension_loaded('swoole')) {
+            $cid = \Swoole\Coroutine::getCid();
+        }
+        return $cid;
     }
 }
